@@ -1,99 +1,12 @@
+#! /usr/bin/env python
+# -*- coding: utf-8 -*-
+from PyKDB_back import Stocks, Futures, Indices, Statistics
 import pandas as pd
 import urllib.request
 from datetime import datetime
 
 
 class PyKDB:
-    master = pd.DataFrame()
-    master_col = ['銘柄名', '市場', '業種']
-
-    # define columns sequence.
-    cols = dict(
-        all       = ('Symbol', 'Name', 'Exchange', 'Sector', 'Open', 'High', 'Low', 'Close', 'Volume', 'DollarVolume'),
-        day       = ('Date', 'Open', 'High', 'Low', 'Close'),
-        day_v     = ('Date', 'Open', 'High', 'Low', 'Close', 'Volume', 'DollarVolume'),
-        session   = ('Date', 'Session', 'Open', 'High', 'Low', 'Close'),
-        session_v = ('Date', 'Session', 'Open', 'High', 'Low', 'Close', 'Volume', 'DollarVolume'),
-        minute    = ('Date', 'Time', 'Open', 'High', 'Low', 'Close'),
-        minute_v  = ('Date', 'Time', 'Open', 'High', 'Low', 'Close', 'Volume', 'DollarVolume'),
-        statistics= ('Date', 'Volume', 'DollarVolume', 'Numbers', 'Pricing', 'Up', 'Unchange', 'Down', 'Incomparable')
-    )
-    # define index sequence.
-    index = dict(
-        day     = ['Date'],
-        session = ['Date', 'Session'],
-        minute  = ['Date', 'Time']
-    )
-    # define base url.
-    base_url = dict(
-        all       ='http://k-db.com/?p=all&download=csv',
-        futures   ='http://k-db.com/futures/{symbol}',
-        indices   ='http://k-db.com/indices/{symbol}',
-        stock     ='http://k-db.com/stocks/{symbol}',
-        statistics='http://k-db.com/statistics/{symbol}'
-    )
-    # define url, columns and index at future DataFrame
-    futures = dict(
-        url=base_url['futures'],
-        cols=dict(
-            d =cols['session_v'],
-            a =cols['session_v'],
-            m5=cols['minute_v'],
-            m =cols['minute_v']
-        ),
-        index=dict(
-            d =index['session'],
-            a =index['session'],
-            m5=index['minute'],
-            m =index['minute']
-        )
-    )
-    # define url, columns and index at index DataFrame
-    indices = dict(
-        url=base_url['indices'],
-        cols=dict(
-            d =cols['day'],
-            a =cols['session'],
-            m5=cols['minute']
-        ),
-        index=dict(
-            d =index['day'],
-            a =index['session'],
-            m5=index['minute']
-        )
-    )
-    # define url, columns and index at stock DataFrame
-    stocks = dict(
-        url=base_url['stock'],
-        cols=dict(
-            d =cols['day_v'],
-            a =cols['session_v'],
-            m5=cols['minute_v'],
-            m =cols['minute_v']
-        ),
-        index=dict(
-            d =index['day'],
-            a =index['session'],
-            m5=index['minute'],
-            m =index['minute']
-        )
-    )
-    # define url, columns and index at statistic DataFrame
-    statistics = dict(
-        url=base_url['statistics'],
-        cols=dict(
-            d=cols['statistics']
-        ),
-        index=dict(
-            d=index['day']
-        )
-    )
-    # define categories
-    ctg = dict(指数=indices, 先物=futures, 個別株=stocks, 統計=statistics)
-    # define future symbols
-    symbols_futures = (
-
-    )
     # define statistic symbols
     symbols_stat = (
         'T1', 'T2', 'TM', 'JQS',
@@ -102,109 +15,103 @@ class PyKDB:
         'T1-I221', 'T1-I222', 'T1-I223', 'T1-I224', 'T1-I225', 'T1-I226', 'T1-I227', 'T1-I228', 'T1-I229', 'T1-I230',
         'T1-I231', 'T1-I232', 'T1-I233'
     )
+    _all_url = 'http://k-db.com/?p=all&download=csv'
+    _base_url = 'http://k-db.com/{category}/{symbol}{interval}?{date}download=csv'
+    _master = pd.DataFrame()
 
     def __init__(self):
         """
         Initialize class.
         :return: None
         """
-        url = self.base_url['all']
-        self.master = self._fetch(url)
-        self.master.set_index('コード', inplace=True)
+        response = urllib.request.urlopen(PyKDB._all_url)
+        PyKDB._master = pd.read_csv(response, encoding='Shift_JIS', skiprows=1)
+        PyKDB._master.set_index('コード', inplace=True)
         return
 
-    def _ctg(self, symbol):
-        if symbol in self.symbols_stat:                       # if symbol is contained symbols_stat, "statistic"
-            res = self.ctg['統計']
-        else:
-            ser = self.master['業種'].ix[symbol]              # symbol is not statistic, check symbol's sector
-            if isinstance(ser, str):
-                res = ser
-            else:
-                res = ser.drop_duplicates()[0]
-
-            res = self.ctg.get(res, self.ctg['個別株'])       # sector contains word "指数", "先物" and others
-        return res
-
     def hist(self, symbol, interval=None, start=None, end=None):
-        ctg = self._ctg(symbol)
+        """
+        :param symbol: stock, index, future or statistics symbol
+        :param interval: d, a, m5, m
+        :param start: when interval is 'd' or 'a', start date.
+                      when interval is 'm5' or 'm', specify date.
+        :param end: when interval is 'd' or 'a', end date.
+                    when interval is 'm5' or 'm', ignored.
+        :return: pandas.DataFrame
+        """
+        if interval in ('d', 'a') and start > end:
+            end = start
 
-        # day
-        df = pd.DataFrame()
-        if interval in ('d', 'a'):
-            if start > end:
-                end = start
+        hist_type = PyKDB.categories(symbol, interval)                            # select historical data type
+        urls = self.urls(hist_type.category, symbol, interval, start, end)     # make url list
 
-            date = datetime(start.year, 1, 1)
-            while date <= end:
-                url = self._url(symbol, interval, date)
-                df = df.append(self._fetch(url))
-                date = datetime(date.year+1, 1, 1)
+        df = pd.concat([PyKDB.fetch_data(url) for url in urls])                       # fetch by url list
+        df = self.indexing(df, symbol, interval)
 
-            df.columns = ctg['cols'][interval]
-            df.set_index(ctg['index'][interval], inplace=True)
-
-#            df.index = pd.to_datetime(df.index)
-#            df = df[(df.index >= start) & (df.index <= end)]
-
-        # minute
-        elif interval in ('m5', 'm'):
-            url = self._url(symbol, interval, start)            # fetching data at start date. (ignore end date.)
-            df = self._fetch(url)
-            df.columns = ctg['cols'][interval]
-            df.set_index(ctg['index'][interval], inplace=True)
-        return df
-
-    def _url(self, symbol, interval, date):
-        ctg = self._ctg(symbol)
-        url_interval = dict(
-            d ='?{date}',
-            a ='/a?{date}',
-            m5='/5min?{date}',
-            m ='/minute?{date}'
-        )
-
-        param = dict()
-        param['symbol'] = symbol
-        if interval in ('d', 'a') and isinstance(date, datetime):
-            param['date'] = 'year=' + str(date.year) + '&'
-        elif interval in ('m5', 'm') and isinstance(date, datetime):
-            param['date'] = 'date=' + datetime.strftime(date, '%Y-%m-%d') + '&'
+        if interval in ('d', 'a'):                                              # truncate outer period
+            result = df.ix[start:end]
         else:
-            url_interval[interval] = None
-            param['date'] = None
+            result = df
+        return result
 
-        url = (ctg['url'] + url_interval[interval] + 'download=csv').format(**param)
-        return url
+    @classmethod
+    def categories(cls, symbol, interval):
+        if symbol in cls.symbols_stat:
+            hist_type = Statistics(interval)
+        elif any(cls._master[cls._master['業種'] == '先物'].index.isin([symbol])):
+            hist_type = Futures(interval)
+        elif any(cls._master[cls._master['業種'] == '指数'].index.isin([symbol])):
+            hist_type = Indices(interval)
+        else:
+            hist_type = Stocks(interval)
+        return hist_type
 
     @staticmethod
-    def _fetch(url):
-        response = urllib.request.urlopen(url)
-        df = pd.read_csv(response, encoding='Shift_JIS', skiprows=1)
+    def indexing(df, symbol, interval):
+        hist_type = PyKDB.categories(symbol, interval)                            # select historical data type
+
+        df.columns = hist_type.column                                           # set column name
+        if interval in ('d', 'a'):
+            df.set_index(pd.to_datetime(df['Date']), inplace=True)
+            df.drop('Date', axis=1, inplace=True)
+        elif interval in ('m5', 'm'):
+            df['Date'] = df['Date'] + ' ' + df['Time']
+            df.set_index(pd.to_datetime(df['Date']), inplace=True)
+            df.drop(hist_type.index, axis=1, inplace=True)
+        df.sort_index(ascending=True, inplace=True)
+        df = df[df['Volume'] > 0]
         return df
 
+    @staticmethod
+    def urls(category, symbol, interval, start, end):
+        url_interval = dict(
+            d='',
+            a='/a',
+            m5='/5min',
+            m='/minutely'
+        )
+        params = [dict(
+                category=category,
+                symbol=symbol,
+                interval=url_interval[interval],
+                date=date
+        ) for date in PyKDB.datestr(interval, start, end)]
 
-if __name__ == '__main__':
-    d_start = datetime(2015,  3,  9)
-    d_end   = datetime(2015, 12, 20)
-    d_date    = datetime(2016,  3,  7)
+        result = [PyKDB._base_url.format(**param) for param in params]
+        return result
 
-    myKDB = PyKDB()
+    @staticmethod
+    def datestr(interval, start, end):
+        if interval in ('d', 'a') and isinstance(start, datetime) and isinstance(end, datetime):
+            result = ['year=' + str(year) + '&' for year in range(start.year, end.year+1)]
+        elif interval in ('m5', 'm') and isinstance(start, datetime):
+            result = ['date=' + datetime.strftime(start, '%Y-%m-%d') + '&']
+        else:
+            result = []
+        return result
 
-#    u_symbol = 'F101-1606'  #future
-#    u_symbol = 'I101'       #index
-    u_symbol = '1301-T'     #stock
-#    u_symbol = 'T1'         #stat
-
-    u_df = myKDB.hist(u_symbol, 'a', d_start, d_end)
-    print(u_df.head(5))
-
-    print(u_df.index)
-#    tmp = pd.to_datetime(u_df.index, utc=True).tz_convert('Asia/Tokyo')
-#    print(tmp)
-#    u_df = myKDB.hist(u_symbol, 'a', d_start, d_end)
-#    print(u_df.head(5))
-#    u_df = myKDB.hist(u_symbol, 'm5', d_start, None)
-#    print(u_df.head(5))
-#    u_df = myKDB.hist(u_symbol, 'm', d_start, None)
-#    print(u_df.head(5))
+    @staticmethod
+    def fetch_data(url):
+        response = urllib.request.urlopen(url)
+        result = pd.read_csv(response, encoding='Shift_JIS', skiprows=1)
+        return result
