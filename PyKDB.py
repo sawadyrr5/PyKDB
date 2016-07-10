@@ -3,6 +3,9 @@ import urllib.request
 import lxml.html
 from datetime import datetime
 import pandas as pd
+import time
+
+_SLEEP_TIME = 0.5
 
 
 # 先物,指数,個別株,統計の基底クラス
@@ -155,6 +158,7 @@ def _fetch_csv(urls):
             df = pd.read_csv(urllib.request.urlopen(url), encoding='Shift_JIS')
         except ValueError or urllib.error.HTTPError:
             df = pd.DataFrame()
+        time.sleep(_SLEEP_TIME)
         return df
 
     dfs = [read_csv(url) for url in urls]
