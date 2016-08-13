@@ -170,21 +170,3 @@ class Stocks(BaseHistorical):
 
 class KDBError(Exception):
     pass
-
-
-if __name__ == '__main__':
-    from datetime import datetime
-
-    sd = datetime(2016, 1, 4)
-    ed = datetime(2016, 1, 7)
-
-    f = Stocks()
-
-    p = f.names['8411-T']
-    print(p)
-
-    # p = f.price(sd, ed, symbol='8411-T', freq='1d')
-    # print(p)
-
-    p = f.price_all(sd, ed)
-    print(p)

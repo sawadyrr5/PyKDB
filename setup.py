@@ -12,6 +12,6 @@ setup(
     author='@sawadybomb',
     install_requires=['pandas', 'lxml'],
     url='https://twitter.com/sawadybomb/',
-    test_suite='test_kdburl.suite',
+    test_suite='runner.main',
     packages=find_packages(),
 )

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import unittest
 from pykdb.data.kdburl import CreateKdbUrl
 from datetime import datetime
