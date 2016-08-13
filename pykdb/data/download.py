@@ -5,7 +5,7 @@ import urllib.request
 
 import pandas as pd
 
-_SLEEP_TIME = 2.0
+_SLEEP_TIME = 2.5
 
 
 def download_csv(url) -> pd.DataFrame:
