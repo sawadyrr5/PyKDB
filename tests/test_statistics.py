@@ -24,7 +24,7 @@ class TestStatistics(unittest.TestCase):
 
     def test_price_all(self):
         df = self.inst.price_all(sd, ed)
-        expected = float(1986751900)
+        expected = float(1986571900)
         actual = float(df.query("日付 == '2016-01-04' and 市場 == '東証1部'")['出来高'])
         self.assertEqual(expected, actual)
 
