@@ -4,4 +4,4 @@ python:
   - 3.5
 
 script:
-  - coverage run --source=hoge_test setup.py test
+  - coverage run --source=test_kdburl setup.py test
