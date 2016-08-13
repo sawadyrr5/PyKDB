@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/sawadyrr5/pykdb.svg?branch=master)](https://travis-ci.org/sawadyrr5/pykdb)
+
 # PyKDB
 k-dbからのデータ取得スクリプト
 
