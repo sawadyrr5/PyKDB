@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 from setuptools import setup, find_packages
+import sys
+
+sys.path.append('./pykdb')
+sys.path.append('./tests')
 
 setup(
     name='pykdb',
@@ -8,5 +12,6 @@ setup(
     author='@sawadybomb',
     install_requires=['pandas', 'lxml'],
     url='https://twitter.com/sawadybomb/',
+    test_suite='test_kdburl.suite',
     packages=find_packages(),
 )

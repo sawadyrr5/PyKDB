@@ -25,10 +25,16 @@ class TestCreateKdbUrl(unittest.TestCase):
             ['http://k-db.com/futures/2016-01-04/e?download=csv',
              'http://k-db.com/futures/2016-01-05/e?download=csv',
              'http://k-db.com/futures/2016-01-06/e?download=csv',
-             'http://k-db.com/futures/2016-01-07/e?download=csv',],
+             'http://k-db.com/futures/2016-01-07/e?download=csv', ],
             ['2016-01-04', '2016-01-05', '2016-01-06', '2016-01-07'])
         actual = f.urls_price_all(sd, ed, 'e')
         self.assertEqual(expected, actual)
+
+
+def suite():
+    suite = unittest.TestSuite()
+    suite.addTests(unittest.makeSuite(TestCreateKdbUrl))
+    return suite
 
 
 if __name__ == '__main__':
