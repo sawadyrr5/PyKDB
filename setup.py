@@ -12,6 +12,12 @@ setup(
     author='@sawadybomb',
     install_requires=['pandas', 'lxml'],
     url='https://twitter.com/sawadybomb/',
-    test_suite='runner.main',
+    test_suite=[
+        'test_futures.suite',
+        'test_indices.suite',
+        'test_kdburl.suite',
+        'test_statistics.suite',
+        'test_stocks.suite',
+    ],
     packages=find_packages(),
 )

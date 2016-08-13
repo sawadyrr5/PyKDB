@@ -29,5 +29,11 @@ class TestStatistics(unittest.TestCase):
         self.assertEqual(expected, actual)
 
 
+def suite():
+    suite = unittest.TestSuite()
+    suite.addTests(unittest.makeSuite(TestStatistics))
+    return suite
+
+
 if __name__ == '__main__':
     unittest.main()

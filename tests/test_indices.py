@@ -29,5 +29,10 @@ class TestIndices(unittest.TestCase):
         self.assertEqual(expected, actual)
 
 
+def suite():
+    suite = unittest.TestSuite()
+    suite.addTests(unittest.makeSuite(TestIndices))
+    return suite
+
 if __name__ == '__main__':
     unittest.main()

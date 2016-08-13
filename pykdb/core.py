@@ -17,20 +17,36 @@ class BaseHistorical:
     _INDEX_PRICE_ALL = str()
 
     def __init__(self):
+        """
+        1. instancing CreateKdbUrl class.
+        2. get category root for parse by lxml.
+        """
         self._web = CreateKdbUrl(self._CATEGORY)
         self._root = self._web.category_root
 
     @property
     def symbols(self):
+        """
+        returns symbols list.
+        :return:
+        """
         return [symbol.split('/')[-1] for symbol in self._root.xpath(self._XPATH['symbols'])]
 
     @property
     def names(self):
+        """
+        returns symbols name dict.
+        :return:
+        """
         n = [e.text for e in self._root.xpath(self._XPATH['names'])]
         return dict(zip(self.symbols, n))
 
     @property
     def contracts(self):
+        """
+        returns symbols contracts.(futures only)
+        :return:
+        """
         c = [e.text for e in self._root.xpath(self._XPATH['contracts'])]
         return dict(zip(self.symbols, c))
 
@@ -68,6 +84,7 @@ class BaseHistorical:
 
             df = df.ix[min(df[df.index >= date_from].index):max(df[df.index <= date_to].index)]
         else:
+            # TODO: 先物が時刻でもソートされるようにする
             df = indexing(df, ['日付', '時刻'])
 
         return df
