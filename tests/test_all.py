@@ -1,9 +1,9 @@
 import unittest
-from .test_futures import TestFutures
-from .test_indices import TestIndices
-from .test_statistics import TestStatistics
-from .test_stocks import TestStocks
-from .test_kdburl import TestCreateKdbUrl
+from tests.test_futures import TestFutures
+from tests.test_indices import TestIndices
+from tests.test_statistics import TestStatistics
+from tests.test_stocks import TestStocks
+from tests.test_kdburl import TestCreateKdbUrl
 
 
 class TestAll(unittest.TestCase):
