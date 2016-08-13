@@ -31,7 +31,7 @@ class TestFutures(unittest.TestCase):
     def test_price_all(self):
         df = self.inst.price_all(sd, ed)
         expected = 18830
-        actual = df.query("日付 == '2016-01-04' and 先物 == '225mini先物 2016年01月限'")['始値']
+        actual = float(df.query("日付 == '2016-01-04' and 先物 == '225mini先物 2016年01月限'")['始値'])
         self.assertEqual(expected, actual)
 
 
