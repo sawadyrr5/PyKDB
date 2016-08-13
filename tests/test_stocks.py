@@ -18,13 +18,13 @@ class TestStocks(unittest.TestCase):
 
     def test_name(self):
         names = self.inst.names
-        expected = '極洋'
+        expected = '1301-T 極洋'
         actual = names['1301-T']
         self.assertEqual(expected, actual)
 
     def test_price_all(self):
         df = self.inst.price_all(sd, ed)
-        expected = 280
+        expected = float(280)
         actual = float(df.query("日付 == '2016-01-04' and コード == '1301-T'")['始値'])
         self.assertEqual(expected, actual)
 
