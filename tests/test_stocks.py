@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import unittest
-from pykdb.core import Stocks
+from pykdb.core import Stocks, KDBError
 from datetime import datetime
 import time
 
@@ -21,6 +21,15 @@ class TestStocks(unittest.TestCase):
         names = self.inst.names
         expected = '1301-T 極洋'
         actual = names['1301-T']
+        self.assertEqual(expected, actual)
+
+    def test_contracts(self):
+        self.assertRaises(NotImplementedError, lambda: self.inst.contracts)
+
+    def test_price(self):
+        df = self.inst.price(sd, ed, '1301-T', '1d')
+        expected = float(280)
+        actual = float(df.query("日付 == '2016-01-04'")['始値'])
         self.assertEqual(expected, actual)
 
     def test_price_all(self):

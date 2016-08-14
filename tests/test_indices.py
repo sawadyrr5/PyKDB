@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import unittest
-from pykdb.core import Indices
+from pykdb.core import Indices, KDBError
 from datetime import datetime
 import time
 
@@ -23,6 +23,9 @@ class TestIndices(unittest.TestCase):
         actual = names['I101']
         self.assertEqual(expected, actual)
 
+    def test_contracts(self):
+        self.assertRaises(NotImplementedError, lambda: self.inst.contracts)
+
     def test_price_all(self):
         time.sleep(10)
         df = self.inst.price_all(sd, ed)
@@ -35,6 +38,7 @@ def suite():
     suite = unittest.TestSuite()
     suite.addTests(unittest.makeSuite(TestIndices))
     return suite
+
 
 if __name__ == '__main__':
     unittest.main()

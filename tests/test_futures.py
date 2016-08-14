@@ -29,6 +29,12 @@ class TestFutures(unittest.TestCase):
         actual = contracts['F101-1609']
         self.assertEqual(expected, actual)
 
+    def test_price(self):
+        df = self.inst.price(sd, ed, 'F101-1609', '1h')
+        expected = float(18790)
+        actual = float(df.query("日付 == '2016-01-04' and 時刻 == '日中'")['始値'])
+        self.assertEqual(expected, actual)
+
     def test_price_all(self):
         time.sleep(10)
         df = self.inst.price_all(sd, ed)
