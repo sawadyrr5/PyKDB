@@ -3,15 +3,12 @@ language: python
 python:
   - 3.5.1
 
-cache:
-  pip: true
-  directories:
-  - "$HOME/.pip-cache/"
-  - "$HOME/virtualenv/python3.5.1"
+cache: pip
 
 install:
-  - pip install coveralls
-  - pip install -r etc/requirements.txt --download-cache $HOME/.pip-cache
+  - CACHE_DIR="$HOME/.cache/pip"
+  - pip install coveralls --cache-dir=$CACHE_DIR
+  - pip install -r etc/requirements.txt --cache-dir=$CACHE_DIR
 
 script:
   - coverage run setup.py test
