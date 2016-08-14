@@ -2,6 +2,7 @@
 import unittest
 from pykdb.core import Statistics
 from datetime import datetime
+import time
 
 sd = datetime(2016, 1, 4)
 ed = datetime(2016, 1, 10)
@@ -23,6 +24,7 @@ class TestStatistics(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     def test_price_all(self):
+        time.sleep(10)
         df = self.inst.price_all(sd, ed)
         expected = float(1986571900)
         actual = float(df.query("日付 == '2016-01-04' and 市場 == '東証1部'")['出来高'])
