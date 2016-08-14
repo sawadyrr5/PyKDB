@@ -1,3 +1,5 @@
+[![Coverage Status](https://coveralls.io/repos/github/sawadyrr5/pykdb/badge.svg)](https://coveralls.io/github/sawadyrr5/pykdb)
+
 [![Build Status](https://travis-ci.org/sawadyrr5/pykdb.svg?branch=master)](https://travis-ci.org/sawadyrr5/pykdb)
 
 # PyKDB
