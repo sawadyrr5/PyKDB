@@ -33,14 +33,10 @@ class TestStatistics(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     def test_price_invalid_symbol(self):
-        expected = KDBError
-        actual = self.inst.price(sd, ed, 'XX', '1d')
-        self.assertEqual(expected, actual)
+        self.assertRaises(KDBError, lambda: self.inst.price(sd, ed, 'XX', '1d'))
 
     def test_price_invalid_freq(self):
-        expected = KDBError
-        actual = self.inst.price(sd, ed, 'T1', '4h')
-        self.assertEqual(expected, actual)
+        self.assertRaises(KDBError, lambda: self.inst.price(sd, ed, 'T1', '4h'))
 
     def test_price_all(self):
         time.sleep(5)
@@ -50,9 +46,7 @@ class TestStatistics(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     def test_price_all_invalid_session(self):
-        expected = KDBError
-        actual = self.inst.price_all(sd, ed, 'e')
-        self.assertEqual(expected, actual)
+        self.assertRaises(KDBError, lambda: self.inst.price_all(sd, ed, 'e'))
 
 
 def suite():
