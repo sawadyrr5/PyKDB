@@ -61,22 +61,26 @@ class BaseHistorical:
             Specify frequency.
         :return: pandas.DataFrame
         """
+        # シンボルがユニバースにない場合は中断
         if symbol not in self.symbols:
             raise KDBError("specified symbol is not found in this _category.")
 
+        # freqが使用可能でない場合は中断
         if freq not in self._AVAILABLE_FREQ:
             raise KDBError("specified freq is not available.")
 
+        # 取得対象URLを生成
         urls = self._web.urls_price(date_from=date_from, date_to=date_to, symbol=symbol, freq=freq)
 
+        # 取得対象URLを順次取得して結合
         dfs = []
-
         for url in urls:
             df = download_csv(url)
             dfs.append(df)
         else:
             df = pd.concat(dfs)
 
+        # 日付変換やらインデックス付けやら
         df['日付'] = pd.to_datetime(df['日付'])
 
         if freq in ['1d', '4h']:
@@ -84,7 +88,7 @@ class BaseHistorical:
 
             df = df.ix[min(df[df.index >= date_from].index):max(df[df.index <= date_to].index)]
         else:
-            # TODO: 先物が時刻でもソートされるようにする
+            # TODO: 2016/8/14 先物が時刻でもソートされるようにする
             df = indexing(df, ['日付', '時刻'])
 
         return df
@@ -98,16 +102,18 @@ class BaseHistorical:
             Specify session.
         :return: pandas.DataFrame
         """
+        # sessionが使用可能でない場合は中断
         if session not in self._AVAILABLE_SESSION:
             raise KDBError("specified session is not available.")
 
+        # 取得対象URLと対応日付を生成
         urls, dates = self._web.urls_price_all(date_from=date_from, date_to=date_to, session=session)
 
-        dfs = []
 
+        # 取得対象URLを順次取得して結合
+        dfs = []
         for url, date in zip(urls, dates):
             df = download_csv(url)
-
             if not df.empty:
                 df['日付'] = date
                 dfs.append(df)
