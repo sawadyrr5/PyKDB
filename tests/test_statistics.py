@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import unittest
 from pykdb.core import Statistics, KDBError
-from datetime import datetime, date
+from datetime import datetime
 import time
 
 sd = datetime(2016, 1, 4)
@@ -44,7 +44,7 @@ class TestStatistics(unittest.TestCase):
         time.sleep(5)
         df = self.inst.price_all(sd, ed)
         expected = float(1986571900)
-        target_date = date(2016, 1, 4)
+        target_date = datetime(2016, 1, 4)
         actual = df.loc[(target_date, '東証1部')]['出来高']
         actual = float(actual)
         self.assertEqual(expected, actual)

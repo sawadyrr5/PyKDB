@@ -135,16 +135,10 @@ class Futures(BaseHistorical):
         contracts='//*[@id="maintable"]/tbody//tr/td[4]/a',
         date_range='//*[@id="contentmain"]/div[3]//div/a/@href'
     )
-    _index = {
-        '1d': ['日付', '時刻'],
-    }
     _INDEX_PRICE_ALL = '先物'
 
 
 class Indices(BaseHistorical):
-    _params = dict(
-        category='indices'
-    )
     _CATEGORY = 'indices'
     _AVAILABLE_FREQ = ['1d', '4h', '1h', '30m', '15m', '5m']
     _AVAILABLE_SESSION = ['', 'a', 'b']
