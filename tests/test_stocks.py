@@ -39,7 +39,7 @@ class TestStocks(unittest.TestCase):
         df = self.inst.price_all(sd, ed)
         expected = float(280)
         target_date = datetime(2016, 1, 4)
-        actual = df[(target_date, '1301-T')]['始値']
+        actual = df.loc[(target_date, '1301-T')]['始値']
         actual = float(actual)
         self.assertEqual(expected, actual)
 

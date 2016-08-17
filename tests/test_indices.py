@@ -39,7 +39,7 @@ class TestIndices(unittest.TestCase):
         df = self.inst.price_all(sd, ed)
         expected = float(18818.58)
         target_date = datetime(2016, 1, 4)
-        actual = df[(target_date, '日経平均株価')]['始値']
+        actual = df.loc[(target_date, '日経平均株価')]['始値']
         actual = float(actual)
         self.assertEqual(expected, actual)
 

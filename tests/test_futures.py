@@ -44,7 +44,7 @@ class TestFutures(unittest.TestCase):
         df = self.inst.price_all(sd, ed)
         expected = float(18830)
         target_date = datetime(2016, 1, 4)
-        actual = df[(target_date, '225mini先物 2016年01月限')]['始値']
+        actual = df.loc[(target_date, '225mini先物 2016年01月限')]['始値']
         actual = float(actual)
         self.assertEqual(expected, actual)
 

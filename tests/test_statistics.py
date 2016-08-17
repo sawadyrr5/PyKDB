@@ -45,7 +45,7 @@ class TestStatistics(unittest.TestCase):
         df = self.inst.price_all(sd, ed)
         expected = float(1986571900)
         target_date = date(2016, 1, 4)
-        actual = df[(target_date, '東証1部')]['出来高']
+        actual = df.loc[(target_date, '東証1部')]['出来高']
         actual = float(actual)
         self.assertEqual(expected, actual)
 
