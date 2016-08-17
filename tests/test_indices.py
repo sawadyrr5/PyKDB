@@ -35,7 +35,7 @@ class TestIndices(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     def test_price_all(self):
-        time.sleep(10)
+        time.sleep(5)
         df = self.inst.price_all(sd, ed)
         expected = float(18818.58)
         target_date = datetime(2016, 1, 4)

@@ -2,9 +2,7 @@
 import pandas as pd
 
 from pykdb.data.download import download_csv
-from pykdb.utils import indexing
 from pykdb.data.kdburl import CreateKdbUrl
-from datetime import datetime, timedelta
 
 
 class BaseHistorical:
