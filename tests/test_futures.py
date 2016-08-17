@@ -3,6 +3,7 @@ import unittest
 from pykdb.core import Futures
 from datetime import datetime
 import time
+import pandas as pd
 
 sd = datetime(2016, 1, 4)
 ed = datetime(2016, 1, 10)
@@ -30,18 +31,21 @@ class TestFutures(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     def test_price(self):
-        sd = datetime(2016, 8, 13)
+        sd = datetime(2016, 8, 12)
         ed = datetime(2016, 8, 13)
         df = self.inst.price(sd, ed, 'F101-1609', '1h')
-        expected = float(16790)
-        actual = float(df.query("日付 == '2016-08-13' and 時刻 == '0:00'")['始値'])
+        expected = float(16800)
+        target_date = datetime(2016, 8, 12, 8)
+        actual = float(df[df.index == target_date]['始値'])
         self.assertEqual(expected, actual)
 
     def test_price_all(self):
         time.sleep(10)
         df = self.inst.price_all(sd, ed)
         expected = float(18830)
-        actual = float(df.query("日付 == '2016-01-04' and 先物 == '225mini先物 2016年01月限'")['始値'])
+        target_date = datetime(2016, 1, 4)
+        actual = df[(target_date, '225mini先物 2016年01月限')]['始値']
+        actual = float(actual)
         self.assertEqual(expected, actual)
 
 

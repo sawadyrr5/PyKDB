@@ -4,6 +4,7 @@ import pandas as pd
 from pykdb.data.download import download_csv
 from pykdb.utils import indexing
 from pykdb.data.kdburl import CreateKdbUrl
+from datetime import datetime, timedelta
 
 
 class BaseHistorical:
@@ -80,17 +81,16 @@ class BaseHistorical:
         else:
             df = pd.concat(dfs)
 
-        # 日付変換やらインデックス付けやら
-        df['日付'] = pd.to_datetime(df['日付'])
-
+        # インデックス設定
         if freq in ['1d', '4h']:
-            df = indexing(df, ['日付'])
-
-            df = df.ix[min(df[df.index >= date_from].index):max(df[df.index <= date_to].index)]
+            df['日付'] = pd.to_datetime(df['日付'])
         else:
-            # TODO: 2016/8/14 先物が時刻でもソートされるようにする
-            df = indexing(df, ['日付', '時刻'])
+            df['日付'] = pd.to_datetime(df['日付'] + ' ' + df['時刻'])
+            df.drop(axis=1, labels='時刻', inplace=True)
 
+        df = df.set_index(keys='日付')
+        df = df.sort_index(axis=0, level='日付')
+        df = df.ix[date_from:date_to]
         return df
 
     def price_all(self, date_from, date_to, session='') -> pd.DataFrame:
@@ -106,21 +106,22 @@ class BaseHistorical:
         if session not in self._AVAILABLE_SESSION:
             raise KDBError("specified session is not available.")
 
-        # 取得対象URLと対応日付を生成
+        # 取得対象URLと対応日付文字列を生成
         urls, dates = self._web.urls_price_all(date_from=date_from, date_to=date_to, session=session)
-
 
         # 取得対象URLを順次取得して結合
         dfs = []
         for url, date in zip(urls, dates):
             df = download_csv(url)
             if not df.empty:
-                df['日付'] = date
+                df['日付'] = pd.to_datetime(date)
                 dfs.append(df)
         else:
             df = pd.concat(dfs)
 
-        df = indexing(df, ['日付', self._INDEX_PRICE_ALL])
+        # インデックス設定
+        df = df.set_index(keys=['日付', self._INDEX_PRICE_ALL])
+        df = df.sort_index(axis=0, level=['日付', self._INDEX_PRICE_ALL])
         return df
 
 

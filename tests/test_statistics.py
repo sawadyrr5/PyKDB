@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import unittest
 from pykdb.core import Statistics, KDBError
-from datetime import datetime
+from datetime import datetime, date
 import time
 
 sd = datetime(2016, 1, 4)
@@ -29,7 +29,9 @@ class TestStatistics(unittest.TestCase):
     def test_price(self):
         df = self.inst.price(sd, ed, 'T1', '1d')
         expected = float(1986571900)
-        actual = float(df.query("日付 == '2016-01-04'")['出来高'])
+        target_date = datetime(2016, 1, 4)
+        actual = df[df.index == target_date]['出来高']
+        actual = float(actual)
         self.assertEqual(expected, actual)
 
     def test_price_invalid_symbol(self):
@@ -42,7 +44,9 @@ class TestStatistics(unittest.TestCase):
         time.sleep(5)
         df = self.inst.price_all(sd, ed)
         expected = float(1986571900)
-        actual = float(df.query("日付 == '2016-01-04' and 市場 == '東証1部'")['出来高'])
+        target_date = date(2016, 1, 4)
+        actual = df[(target_date, '東証1部')]['出来高']
+        actual = float(actual)
         self.assertEqual(expected, actual)
 
     def test_price_all_invalid_session(self):

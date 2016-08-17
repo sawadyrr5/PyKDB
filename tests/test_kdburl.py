@@ -11,7 +11,7 @@ class TestCreateKdbUrl(unittest.TestCase):
     def test_date_range(self):
         f = CreateKdbUrl('futures')
         expected = ['2016-01-04', '2016-01-05', '2016-01-06', '2016-01-07']
-        actual = f._date_range(sd, ed)
+        actual = f._date_strings(sd, ed)
         self.assertEqual(expected, actual)
 
     def test_futures_price(self):

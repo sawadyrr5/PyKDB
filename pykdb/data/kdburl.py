@@ -45,7 +45,7 @@ class CreateKdbUrl:
         :return:
         """
         base_url = self._URL_CATEGORY + self._URL_PRICE + self._URL_PRICE_DL
-        dates = self._date_range(date_from, date_to, freq)
+        dates = self._date_strings(date_from, date_to, freq)
         params = [dict(category=self._category, symbol=symbol, freq=freq, date=date) for date in dates]
         return [base_url.format(**param) for param in params]
 
@@ -61,12 +61,12 @@ class CreateKdbUrl:
             session = '/' + session
 
         base_url = self._URL_CATEGORY + self._URL_PRICE_ALL
-        dates = self._date_range(date_from, date_to)
+        dates = self._date_strings(date_from, date_to)
         params = [dict(category=self._category, date=date, session=session) for date in dates]
         urls = [base_url.format(**param) for param in params]
         return urls, dates
 
-    def _date_range(self, start, end, freq=None):
+    def _date_strings(self, start, end, freq=None):
         """
         create formatted date string list.
         :param start:

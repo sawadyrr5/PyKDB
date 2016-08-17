@@ -29,14 +29,18 @@ class TestStocks(unittest.TestCase):
     def test_price(self):
         df = self.inst.price(sd, ed, '1301-T', '1d')
         expected = float(280)
-        actual = float(df.query("日付 == '2016-01-04'")['始値'])
+        target_date = datetime(2016, 1, 4)
+        actual = df[df.index == target_date]['始値']
+        actual = float(actual)
         self.assertEqual(expected, actual)
 
     def test_price_all(self):
-        time.sleep(10)
+        time.sleep(5)
         df = self.inst.price_all(sd, ed)
         expected = float(280)
-        actual = float(df.query("日付 == '2016-01-04' and コード == '1301-T'")['始値'])
+        target_date = datetime(2016, 1, 4)
+        actual = df[(target_date, '1301-T')]['始値']
+        actual = float(actual)
         self.assertEqual(expected, actual)
 
 
