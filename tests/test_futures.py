@@ -3,7 +3,6 @@ import unittest
 from pykdb.core import Futures
 from datetime import datetime
 import time
-import pandas as pd
 
 sd = datetime(2016, 1, 4)
 ed = datetime(2016, 1, 10)
