@@ -52,9 +52,6 @@ class TestFutures(unittest.TestCase):
         actual = float(actual)
         self.assertEqual(expected, actual)
 
-    def test_del_cache(self):
-        self.inst.
-
 
 def suite():
     suite = unittest.TestSuite()
