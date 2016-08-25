@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import unittest
-from pykdb.core import Indices, KDBError
+from pykdb.core import Indices
 from datetime import datetime
 import time
 
@@ -22,9 +22,6 @@ class TestIndices(unittest.TestCase):
         expected = '日経平均株価'
         actual = names['I101']
         self.assertEqual(expected, actual)
-
-    def test_contracts(self):
-        self.assertRaises(NotImplementedError, lambda: self.inst.contracts)
 
     def test_price(self):
         df = self.inst.price(sd, ed, 'I101', '1d')

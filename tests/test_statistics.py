@@ -23,9 +23,6 @@ class TestStatistics(unittest.TestCase):
         actual = names['T1']
         self.assertEqual(expected, actual)
 
-    def test_contracts(self):
-        self.assertRaises(NotImplementedError, lambda: self.inst.contracts)
-
     def test_price(self):
         df = self.inst.price(sd, ed, 'T1', '1d')
         expected = float(1986571900)
