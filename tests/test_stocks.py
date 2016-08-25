@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import unittest
-from pykdb.core import Stocks, KDBError
+from pykdb.core import Stocks
 from datetime import datetime
 import time
 
