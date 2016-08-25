@@ -2,7 +2,7 @@
 
 import pandas as pd
 
-from pykdb.data.kdb import KdbDownloader, KdbPrice, KdbPriceAll
+from .data.kdb import KdbDownloader, KdbPrice, KdbPriceAll
 
 
 class _Historical:
