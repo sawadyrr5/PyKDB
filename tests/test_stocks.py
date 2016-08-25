@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 import unittest
-from pykdb.core import Stocks, KDBError
+from pykdb.core import Stocks
 from datetime import datetime
 import time
 
 sd = datetime(2016, 1, 4)
 ed = datetime(2016, 1, 10)
 
+test_symbol ='1301-T'
+test_name = '1301-T 極洋'
 
 class TestStocks(unittest.TestCase):
     inst = Stocks()
@@ -14,20 +16,17 @@ class TestStocks(unittest.TestCase):
     def test_symbol(self):
         symbols = self.inst.symbols
         expected = True
-        actual = '1301-T' in symbols
+        actual = test_symbol in symbols
         self.assertEqual(expected, actual)
 
     def test_name(self):
         names = self.inst.names
-        expected = '1301-T 極洋'
-        actual = names['1301-T']
+        expected = test_name
+        actual = names[test_symbol]
         self.assertEqual(expected, actual)
 
-    def test_contracts(self):
-        self.assertRaises(NotImplementedError, lambda: self.inst.contracts)
-
     def test_price(self):
-        df = self.inst.price(sd, ed, '1301-T', '1d')
+        df = self.inst.price(sd, ed, test_symbol)
         expected = float(280)
         target_date = datetime(2016, 1, 4)
         actual = df[df.index == target_date]['始値']
@@ -39,7 +38,7 @@ class TestStocks(unittest.TestCase):
         df = self.inst.price_all(sd, ed)
         expected = float(280)
         target_date = datetime(2016, 1, 4)
-        actual = df.loc[(target_date, '1301-T')]['始値']
+        actual = df.loc[(target_date, test_symbol)]['始値']
         actual = float(actual)
         self.assertEqual(expected, actual)
 

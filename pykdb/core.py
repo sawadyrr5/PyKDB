@@ -1,80 +1,48 @@
 # -*- coding: utf-8 -*-
+
 import pandas as pd
 
-from pykdb.data.download import download_csv
-from pykdb.data.kdburl import CreateKdbUrl
+from .data.kdb import KdbDownloader, KdbPrice, KdbPriceAll
 
 
-class BaseHistorical:
-    """
-    先物,指数,個別株,統計の基底クラス
-    """
-    _CATEGORY = str()
+class _Historical:
+    _CATEGORY = ''
+    _URL_DOWNLOAD = ''
+    _FILE_NAME = ''
     _AVAILABLE_FREQ = tuple()
     _AVAILABLE_SESSION = tuple()
     _XPATH = dict()
     _INDEX_PRICE_ALL = str()
+    _param = {}
 
-    def __init__(self):
-        """
-        1. instancing CreateKdbUrl class.
-        2. get category root for parse by lxml.
-        """
-        self._web = CreateKdbUrl(self._CATEGORY)
-        self._root = self._web.category_root
+    def __init__(self, enable_cache=True):
+        dl = KdbDownloader(category=self._CATEGORY, enable_cache=enable_cache, )
+
+        self._root = dl.root()
+        self._symbols = [symbol.split('/')[-1] for symbol in self._root.xpath(self._XPATH['symbols'])]
+        self._names = [e.text for e in self._root.xpath(self._XPATH['names'])]
 
     @property
     def symbols(self):
-        """
-        returns symbols list.
-        :return:
-        """
-        return [symbol.split('/')[-1] for symbol in self._root.xpath(self._XPATH['symbols'])]
+        return self._symbols
 
     @property
     def names(self):
-        """
-        returns symbols name dict.
-        :return:
-        """
-        n = [e.text for e in self._root.xpath(self._XPATH['names'])]
-        return dict(zip(self.symbols, n))
+        return dict(zip(self._symbols, self._names))
 
-    @property
-    def contracts(self):
-        """
-        returns symbols contracts.(futures only)
-        :return:
-        """
-        c = [e.text for e in self._root.xpath(self._XPATH['contracts'])]
-        return dict(zip(self.symbols, c))
+    def price(self, date_from, date_to, symbol, freq='1d') -> pd.DataFrame:
 
-    def price(self, date_from, date_to, symbol: str, freq: str) -> pd.DataFrame:
-        """
-        Download historical price of specified symbol.
-        :param date_from:
-        :param date_to:
-        :param symbol:
-            Specify symbol.
-        :param freq:
-            Specify frequency.
-        :return: pandas.DataFrame
-        """
-        # シンボルがユニバースにない場合は中断
         if symbol not in self.symbols:
-            raise KDBError("specified symbol is not found in this _category.")
+            raise KDBError("specified symbol is not found in this category.")
 
-        # freqが使用可能でない場合は中断
         if freq not in self._AVAILABLE_FREQ:
             raise KDBError("specified freq is not available.")
 
-        # 取得対象URLを生成
-        urls = self._web.urls_price(date_from=date_from, date_to=date_to, symbol=symbol, freq=freq)
+        dl = KdbPrice(category=self._CATEGORY, symbol=symbol, freq=freq)
 
-        # 取得対象URLを順次取得して結合
         dfs = []
-        for url in urls:
-            df = download_csv(url)
+        for date in dl.date_range(date_from=date_from, date_to=date_to):
+            df = dl.read(date)
             dfs.append(df)
         else:
             df = pd.concat(dfs)
@@ -84,33 +52,23 @@ class BaseHistorical:
             df['日付'] = pd.to_datetime(df['日付'])
         else:
             df['日付'] = pd.to_datetime(df['日付'] + ' ' + df['時刻'])
-            df.drop(axis=1, labels='時刻', inplace=True)
+        # df.drop(axis=1, labels='時刻', inplace=True)
 
         df = df.set_index(keys='日付')
         df = df.sort_index(axis=0, level='日付')
         df = df.ix[date_from:date_to]
         return df
 
-    def price_all(self, date_from, date_to, session='') -> pd.DataFrame:
-        """
-        Download historical price of all symbols.
-        :param date_from:
-        :param date_to:
-        :param session:
-            Specify session.
-        :return: pandas.DataFrame
-        """
-        # sessionが使用可能でない場合は中断
+    def price_all(self, date_from, date_to, session='', *args, **kwargs) -> pd.DataFrame:
+
         if session not in self._AVAILABLE_SESSION:
             raise KDBError("specified session is not available.")
 
-        # 取得対象URLと対応日付文字列を生成
-        urls, dates = self._web.urls_price_all(date_from=date_from, date_to=date_to, session=session)
+        dl = KdbPriceAll(category=self._CATEGORY, session=session)
 
-        # 取得対象URLを順次取得して結合
         dfs = []
-        for url, date in zip(urls, dates):
-            df = download_csv(url)
+        for date in dl.date_range(date_from=date_from, date_to=date_to):
+            df = dl.read(date)
             if not df.empty:
                 df['日付'] = pd.to_datetime(date)
                 dfs.append(df)
@@ -123,7 +81,11 @@ class BaseHistorical:
         return df
 
 
-class Futures(BaseHistorical):
+class KDBError(Exception):
+    pass
+
+
+class Futures(_Historical):
     _CATEGORY = 'futures'
     _AVAILABLE_FREQ = ['1d', '4h', '1h', '30m', '15m', '5m']
     _AVAILABLE_SESSION = ['', 'e']
@@ -135,8 +97,22 @@ class Futures(BaseHistorical):
     )
     _INDEX_PRICE_ALL = '先物'
 
+    _contracts = []
 
-class Indices(BaseHistorical):
+    def __init__(self):
+        super().__init__()
+        self._contracts = [e.text for e in self._root.xpath(self._XPATH['contracts'])]
+
+    @property
+    def contracts(self):
+        """
+        return symbol contracts.
+        :return:
+        """
+        return dict(zip(self.symbols, self._contracts))
+
+
+class Indices(_Historical):
     _CATEGORY = 'indices'
     _AVAILABLE_FREQ = ['1d', '4h', '1h', '30m', '15m', '5m']
     _AVAILABLE_SESSION = ['', 'a', 'b']
@@ -147,12 +123,11 @@ class Indices(BaseHistorical):
     )
     _INDEX_PRICE_ALL = '指数'
 
-    @property
-    def contracts(self):
-        raise NotImplementedError
+    def __init__(self):
+        super().__init__()
 
 
-class Statistics(BaseHistorical):
+class Statistics(_Historical):
     _CATEGORY = 'statistics'
     _AVAILABLE_FREQ = ['1d']
     _AVAILABLE_SESSION = ['']
@@ -163,12 +138,11 @@ class Statistics(BaseHistorical):
     )
     _INDEX_PRICE_ALL = '市場'
 
-    @property
-    def contracts(self):
-        raise NotImplementedError
+    def __init__(self):
+        super().__init__()
 
 
-class Stocks(BaseHistorical):
+class Stocks(_Historical):
     _CATEGORY = 'stocks'
     _AVAILABLE_FREQ = ['1d', '4h', '1h', '30m', '15m', '5m']
     _AVAILABLE_SESSION = ['', 'a', 'b']
@@ -179,10 +153,22 @@ class Stocks(BaseHistorical):
     )
     _INDEX_PRICE_ALL = 'コード'
 
-    @property
-    def contracts(self):
-        raise NotImplementedError
+    def __init__(self):
+        super().__init__()
 
 
-class KDBError(Exception):
-    pass
+
+
+if __name__ == '__main__':
+    from datetime import datetime
+    from pykdb import Stocks
+
+    start = datetime(2016, 1, 4)
+    end = datetime(2016, 1, 10)
+
+    obj = Stocks()
+    # print(obj.symbols)
+
+    print(obj.price(start, end, '1301-T'))
+
+    print(obj.price_all(start, end, ''))
