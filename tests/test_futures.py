@@ -7,6 +7,11 @@ import time
 sd = datetime(2016, 1, 4)
 ed = datetime(2016, 1, 10)
 
+test_symbol = 'F101-1609'
+test_name = '日経平均先物'
+test_contract = '2016年09月限'
+test_name_contract = '225mini先物 2016年01月限'
+
 
 class TestFutures(unittest.TestCase):
     inst = Futures()
@@ -14,25 +19,25 @@ class TestFutures(unittest.TestCase):
     def test_symbol(self):
         symbols = self.inst.symbols
         expected = True
-        actual = 'F101-1609' in symbols
+        actual = test_symbol in symbols
         self.assertEqual(expected, actual)
 
     def test_name(self):
         names = self.inst.names
-        expected = '日経平均先物'
-        actual = names['F101-1609']
+        expected = test_name
+        actual = names[test_symbol]
         self.assertEqual(expected, actual)
 
     def test_contract(self):
         contracts = self.inst.contracts
-        expected = '2016年09月限'
-        actual = contracts['F101-1609']
+        expected = test_contract
+        actual = contracts[test_symbol]
         self.assertEqual(expected, actual)
 
     def test_price(self):
         sd = datetime(2016, 8, 12)
         ed = datetime(2016, 8, 13)
-        df = self.inst.price(sd, ed, 'F101-1609', '1h')
+        df = self.inst.price(sd, ed, test_symbol, '1h')
         expected = float(16800)
         target_date = datetime(2016, 8, 12, 8)
         actual = float(df[df.index == target_date]['始値'])
@@ -43,7 +48,7 @@ class TestFutures(unittest.TestCase):
         df = self.inst.price_all(sd, ed)
         expected = float(18830)
         target_date = datetime(2016, 1, 4)
-        actual = df.loc[(target_date, '225mini先物 2016年01月限')]['始値']
+        actual = df.loc[(target_date, test_name_contract)]['始値']
         actual = float(actual)
         self.assertEqual(expected, actual)
 

@@ -7,6 +7,8 @@ import time
 sd = datetime(2016, 1, 4)
 ed = datetime(2016, 1, 10)
 
+test_symbol = 'T1'
+test_name =  '東証1部'
 
 class TestStatistics(unittest.TestCase):
     inst = Statistics()
@@ -14,17 +16,17 @@ class TestStatistics(unittest.TestCase):
     def test_symbol(self):
         symbols = self.inst.symbols
         expected = True
-        actual = 'T1' in symbols
+        actual = test_symbol in symbols
         self.assertEqual(expected, actual)
 
     def test_name(self):
         names = self.inst.names
-        expected = '東証1部'
-        actual = names['T1']
+        expected = test_name
+        actual = names[test_symbol]
         self.assertEqual(expected, actual)
 
     def test_price(self):
-        df = self.inst.price(sd, ed, 'T1', '1d')
+        df = self.inst.price(sd, ed, test_symbol)
         expected = float(1986571900)
         target_date = datetime(2016, 1, 4)
         actual = df[df.index == target_date]['出来高']
@@ -42,7 +44,7 @@ class TestStatistics(unittest.TestCase):
         df = self.inst.price_all(sd, ed)
         expected = float(1986571900)
         target_date = datetime(2016, 1, 4)
-        actual = df.loc[(target_date, '東証1部')]['出来高']
+        actual = df.loc[(target_date, test_name)]['出来高']
         actual = float(actual)
         self.assertEqual(expected, actual)
 

@@ -7,6 +7,8 @@ import time
 sd = datetime(2016, 1, 4)
 ed = datetime(2016, 1, 10)
 
+test_symbol = 'I101'
+test_name = '日経平均株価'
 
 class TestIndices(unittest.TestCase):
     inst = Indices()
@@ -14,17 +16,17 @@ class TestIndices(unittest.TestCase):
     def test_symbol(self):
         symbols = self.inst.symbols
         expected = True
-        actual = 'I101' in symbols
+        actual = test_symbol in symbols
         self.assertEqual(expected, actual)
 
     def test_name(self):
         names = self.inst.names
-        expected = '日経平均株価'
-        actual = names['I101']
+        expected = test_name
+        actual = names[test_symbol]
         self.assertEqual(expected, actual)
 
     def test_price(self):
-        df = self.inst.price(sd, ed, 'I101', '1d')
+        df = self.inst.price(sd, ed, test_symbol)
         expected = float(18818.58)
         target_date = datetime(2016, 1, 4)
         actual = df[df.index == target_date]['始値']
@@ -36,7 +38,7 @@ class TestIndices(unittest.TestCase):
         df = self.inst.price_all(sd, ed)
         expected = float(18818.58)
         target_date = datetime(2016, 1, 4)
-        actual = df.loc[(target_date, '日経平均株価')]['始値']
+        actual = df.loc[(target_date, test_name)]['始値']
         actual = float(actual)
         self.assertEqual(expected, actual)
 
