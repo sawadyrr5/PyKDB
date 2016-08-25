@@ -9,7 +9,7 @@ from datetime import datetime
 
 
 class KdbDownloader:
-    _CACHE_DIR = '/cache/'
+    _CACHE_DIR = './cache/'
     _URL_CATEGORY = 'http://k-db.com/{category}/'
     _URL_DOWNLOAD = ''
     _FILE_NAME = ''
@@ -19,7 +19,7 @@ class KdbDownloader:
     def __init__(self, category, enable_cache=True):
         self._param['category'] = category
         self._enable_cache = enable_cache
-        self._lib_root = os.path.dirname(os.path.abspath(__file__))
+        # self._lib_root = os.path.dirname(os.path.abspath(__file__))
 
     def root(self):
         url = self._URL_CATEGORY.format(**self._param)
@@ -31,14 +31,15 @@ class KdbDownloader:
         self._param['date'] = date
 
         if self._enable_cache:
-            _path = self._lib_root + self._CACHE_DIR + self._path(**self._param)
+            base = os.path.dirname(os.path.abspath(__file__))
+            _path = os.path.normpath(os.path.join(base, self._CACHE_DIR, self._path(**self._param)))
+
+            # _path = dir + self._path(**self._param)
             if os.path.exists(_path):
                 df = pd.read_csv(_path, encoding='Shift_JIS')
             else:
                 df = self._download(**self._param)
                 if not df.empty:
-                    print()
-                    print(_path)
                     df.to_csv(_path, index=False)
         else:
             df = self._download(**self._param)
@@ -46,8 +47,10 @@ class KdbDownloader:
         return df
 
     def del_cache(self, **kwargs):
+        base = os.path.dirname(os.path.abspath(__file__))
+        cache_dir = os.path.normpath(os.path.join(base, self._CACHE_DIR))
         _path = self._path(**kwargs)
-        for f in os.listdir(self._CACHE_DIR):
+        for f in os.listdir(cache_dir):
             if f == _path:
                 os.remove(_path)
 
