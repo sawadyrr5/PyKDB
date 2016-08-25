@@ -13,6 +13,5 @@ setup(
     install_requires=['pandas', 'lxml'],
     url='https://twitter.com/sawadybomb/',
     test_suite='test_all.suite',
-    packages=find_packages(),
-    package_dir={'': 'pykdb'}
+    packages=find_packages()
 )
